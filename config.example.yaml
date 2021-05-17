@@ -17,3 +17,4 @@ config:
   reminder_search_interval: 30
   slicer_path: /path/to/prusa-slicer
   printer_file_root: /path/to/print/files
+  auto_publish_channels: [ 926 ]

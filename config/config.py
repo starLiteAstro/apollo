@@ -26,6 +26,7 @@ class Config:
         self.REMINDER_SEARCH_INTERVAL: int = parsed.get("reminder_search_interval")
         self.SLICER_PATH: Path = Path(parsed.get("slicer_path"))
         self.PRINTER_FILE_ROOT: Path = Path(parsed.get("printer_file_root"))
+        self.AUTO_PUBLISH_CHANNELS: list[int] = parsed.get("auto_publish_channels")
 
 
 CONFIG = Config("config.yaml")
