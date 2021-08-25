@@ -46,7 +46,7 @@ def make_karma(el: list):
 def make_op_regex(o):
     non_op_pre = r"(?<![+-])"
     non_op_post = r"(?![+-])"
-    allowed_post = r"(?=[ \t\v!,;:?]|$)"
+    allowed_post = r"(?=[ \t\v\n!,;:?]|$)"
     return rf"{non_op_pre}{o}{non_op_post}{allowed_post}"
 
 
@@ -82,4 +82,4 @@ def parse_message_content(content: str) -> List[KarmaItem]:
     cleaned = re.sub(r"`.*?`", " ", cleaned, flags=re.DOTALL)
     if cleaned == "" or cleaned.isspace():
         return []
-    return KarmaParser.parse_all.parse(cleaned).or_die()
+    return list(KarmaParser.parse_all.parse(cleaned).or_die())
