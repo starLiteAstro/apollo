@@ -23,6 +23,7 @@ EXTENSIONS = [
     "cogs.commands.karma",
     "cogs.commands.lcalc",
     "cogs.commands.misc",
+    "cogs.commands.quotes",
     "cogs.commands.reminders",
     "cogs.commands.roll",
     "cogs.commands.say",
@@ -54,13 +55,12 @@ async def reload_cogs(ctx: Context):
 @bot.event
 async def on_ready():
     if CONFIG.BOT_LOGGING:
-        # TODO: Write this to a logging file?
         logging.info("Logged in as")
         logging.info(str(bot.user))
         logging.info("------")
 
 
-if __name__ == "__main__":
+def main():
     if CONFIG.BOT_LOGGING:
         logging.basicConfig(level=logging.WARNING)
     for extension in EXTENSIONS:
@@ -70,5 +70,8 @@ if __name__ == "__main__":
         except Exception as e:
             exc = f"{type(e).__name__}: {e.with_traceback()}"
             logging.error(f"Failed to load extension {extension}\n{exc}")
-
     bot.run(CONFIG.DISCORD_TOKEN)
+
+
+if __name__ == "__main__":
+    main()
