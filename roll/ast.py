@@ -1,13 +1,13 @@
 import logging
 import random
 from abc import ABC, abstractmethod
-from copy import copy
 from enum import Enum, auto
 
 import roll.exceptions as rollerr
 
 # import * imports all tokens, operators, the Assignment class, and the root Program class
 __all__ = [
+    "MAX_ROLLS",
     "TokenNumber",
     "TokenString",
     "TokenRoll",
@@ -364,7 +364,7 @@ class TokenApplication(IToken):
             decls.append(Assignment(out.arg_name, expr, id=out.arg_id))
             out = (
                 out.expression
-            )  # Note: this used to attempt to .dereference() - I can't remember why but it seems to work without it
+            )  # Note: this used to attempt to .dereference() - I can't remember why, but it seems to work without it
         # Substitute variables for scoped variables (allows recursion)
         substitutions = {}
         env = env.copy()
@@ -484,10 +484,7 @@ class TokenOperator(IToken):
         except ZeroDivisionError:
             raise rollerr.ZeroDivisionError(env.trace)
 
-        if value == True:
-            value = 1
-        elif value == False:
-            value = 0
+        value = 1 if value else 0
         return TokenNumber(value)
 
     def substitute(self, old_to_new):

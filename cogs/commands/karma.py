@@ -118,7 +118,6 @@ async def plot_karma(karma_dict: Dict[str, List[KarmaChange]]) -> (str, str):
     # Transform the karma changes into plottable values
     for karma, changes in karma_dict.items():
         scores = [k.score for k in changes]
-        time = []
         time = date2num([k.local_time for k in changes])
 
         # Plot the values
@@ -288,7 +287,7 @@ class Karma(commands.Cog):
         filename, path = await plot_karma({karma_stripped: karma_item.changes})
 
         # Get the user with the most karma
-        # I'd use a group_by sql statement here but it seems to not terminate
+        # I'd use a group_by sql statement here, but it seems to not terminate
         all_changes = (
             db_session.query(KarmaChange)
             .filter(KarmaChange.karma_id == karma_item.id)
@@ -499,7 +498,7 @@ class Karma(commands.Cog):
                 else:
                     return "＝"
 
-            # Get all of the changes that have some reason
+            # Get all the changes that have some reason
             karma_changes = (
                 db_session.query(KarmaChange)
                 .filter(
