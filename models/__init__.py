@@ -1,3 +1,4 @@
+from models.announcement import *
 from models.channel_settings import *
 from models.counting import *
 from models.karma import *
@@ -7,3 +8,4 @@ from models.printing import *
 from models.quote import *
 from models.reminder import *
 from models.user import *
+from models.votes import *

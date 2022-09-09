@@ -1,8 +1,9 @@
 import functools
 import re
+import textwrap
 from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
-from typing import Iterable
+from typing import Iterable, List, Union
 
 import dateparser
 import discord
@@ -12,6 +13,7 @@ from more_itertools import partition
 import models
 from config import CONFIG
 from models import db_session
+from models.user import User
 from utils.typing import Identifiable
 
 __all__ = [
@@ -30,6 +32,7 @@ __all__ = [
     "partition_list",
     "pluralise",
     "user_is_irc_bot",
+    "replace_external_emoji",
 ]
 
 
@@ -87,13 +90,11 @@ def format_list_of_members(members, /, *, ping=True):
     return format_list(el)
 
 
-def get_database_user_from_id(id_: int, /) -> models.User:
-    return (
-        db_session.query(models.User).filter(models.User.user_uid == id_).one_or_none()
-    )
+def get_database_user_from_id(id_: int, /) -> User:
+    return db_session.query(User).filter(User.user_uid == id_).one_or_none()
 
 
-def get_database_user(user: Identifiable, /) -> models.User:
+def get_database_user(user: Identifiable, /) -> User:
     return get_database_user_from_id(user.id)
 
 
@@ -206,6 +207,71 @@ def pluralise(el, /, word, single="", plural="s"):
 
 def user_is_irc_bot(ctx):
     return ctx.author.id == CONFIG.UWCS_DISCORD_BRIDGE_BOT_ID
+
+
+def replace_external_emoji(guild, string):
+    """References to external emojis aren't updated by default. Can be used so bot only emojis don't pollute server pool"""
+    from apollo import bot
+
+    def emotes(match: re.Match):
+        # If emoji body
+        if match.group(2):
+            # Prioritize local emoji
+            e: discord.Emoji = discord.utils.get(guild.emojis, name=match.group(2))
+            if e is None:  # If no local, check all servers the bot is in
+                e = discord.utils.get(bot.emojis, name=match.group(2))
+            if e is not None:
+                return match.group(1) + str(e)
+        return match.group(0)
+
+    return re.sub("(^|[^<]):([-_a-zA-Z0-9]+):", emotes, string)
+
+
+def split_into_messages(sections: Union[str, List[str]], limit=4096):
+    """Split a string (or list of sections) into small enough chunks to send (4096 chars)"""
+    if isinstance(sections, str):
+        sections = [sections]
+
+    sections = "§".join(sections)
+    result = split_by(
+        [
+            lambda x: x.split("§"),
+            lambda x: x.split("\n"),  # Then split by lines
+            lambda x: textwrap.wrap(
+                x, width=limit
+            ),  # Then split within lines, using textwrap
+        ],
+        sections,
+        limit,
+    )
+    result = [x.replace("§", "\n") for x in result]
+    return result
+
+
+def split_by(split_funcs, section, limit=4000):
+    """Split section by each of split_funcs in descending order until each chunk is smaller than limit"""
+    section = section.replace("\n\n", "\n_ _\n")
+    if len(section) <= limit:
+        return [section.strip("\n")]  # Base case
+    else:
+        parts = split_funcs[0](section)
+        accum = ""
+        result = []
+        for part in parts:
+            # For each part (as split by first of split_funcs), attempt to accumulate
+            new_accum = accum + "\n" + part
+            # If short enough, combine with previous parts in accumulator
+            if len(new_accum) <= limit:
+                accum = new_accum
+            else:  # If too long, clear accumulator, and attempt next level of split
+                if accum:
+                    result.append(accum.strip("\n"))
+                result += split_by(split_funcs[1:], part, limit)
+                accum = ""
+        # Add any tail to result
+        if accum:
+            result.append(accum.strip("\n"))
+        return result
 
 
 def wait_react(func):
