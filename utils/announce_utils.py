@@ -1,16 +1,26 @@
+import asyncio
 import inspect
 import io
+import logging
 import re
 
 import discord
-from discord import AllowedMentions
+from discord import AllowedMentions, ui
 from discord.ext.commands import Context
 from PIL import Image, ImageDraw, ImageFont
 
 import utils
 
-font: ImageFont.ImageFont = ImageFont.truetype("resources/Montserrat-SemiBold.ttf", 90)
-subfont: ImageFont.ImageFont = ImageFont.truetype("resources/Montserrat-Medium.ttf", 45)
+try:
+    font: ImageFont.ImageFont = ImageFont.truetype(
+        "resources/Montserrat-SemiBold.ttf", 90
+    )
+    subfont: ImageFont.ImageFont = ImageFont.truetype(
+        "resources/Montserrat-Medium.ttf", 45
+    )
+except OSError as e:
+    logging.warn("Error loading announcement title fonts")
+    font, subfont = None, None
 
 
 async def generate_announcement(
@@ -55,8 +65,8 @@ async def generate_announcement(
     # Send each line
     for line in lines:
         # Find each type
-        sub_group = re.search(r"^## ?(.+)$", line)
-        title_group = re.search(r"^# ?(.+)$", line)
+        sub_group = subfont is not None and re.search(r"^## ?(.+)$", line)
+        title_group = font is not None and re.search(r"^# ?(.+)$", line)
         img_group = re.search(r"^IMG (.+)$", line)
         break_group = re.search(r"^BREAK$", line)
         # Carry out any action
@@ -75,6 +85,8 @@ async def generate_announcement(
                 pass
 
         else:  # Is just text
+            if line and line[0] == "#":
+                line = f"**{line.strip('# ')}**"
             if (len(accumulated_lines) + len(line)) > 1900:
                 await send_lines()
             accumulated_lines.append(line)
@@ -201,3 +213,37 @@ async def nothing(*args):
 
 async def delete_msg(msg: discord.Message):
     await msg.delete()
+
+
+class ContentModal(ui.Modal, title="Content"):
+    def __init__(self, placeholder):
+        super().__init__()
+        self.result = None
+        self.done = asyncio.Event()
+        self.new_ctx = None
+
+        self.content = ui.TextInput(
+            label="Content", style=discord.TextStyle.long, default=placeholder
+        )
+        self.add_item(self.content)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        self.result = self.content.value
+        self.new_ctx = Context.from_interaction(interaction)
+        self.done.set()
+        await interaction.response.send_message("Message Edited", ephemeral=True)
+
+
+async def get_long_msg(ctx, orig_content=None, placeholder=None):
+    if orig_content is not None:
+        return ctx, orig_content
+
+    if ref := ctx.message.reference:  # If reply (for text cmd)
+        rep_msg = await ctx.channel.fetch_message(ref.message_id)
+        return ctx, rep_msg.content
+    elif ctx.interaction:  # If interaction (slash cmd)
+        modal = ContentModal(placeholder)
+        await ctx.interaction.response.send_modal(modal)
+        await modal.done.wait()
+        return modal.new_ctx, modal.result
+    return ctx, None
