@@ -9,7 +9,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing_extensions import TYPE_CHECKING
 
-from models.models import Base, discord_snowflake
+from models.models import Base, discord_snowflake, timestamp
 
 # breaks the circular import at runtime
 # still happens when type checking
@@ -47,9 +47,7 @@ class Karma(Base):
         back_populates="karma", order_by=KarmaChange.created_at.asc(), init=False
     )
 
-    added: Mapped[datetime] = mapped_column(
-        default=func.current_timestamp(),
-    )
+    added: Mapped[timestamp]
     pluses: Mapped[int] = mapped_column(default=0)
     minuses: Mapped[int] = mapped_column(default=0)
     neutrals: Mapped[int] = mapped_column(default=0)
@@ -68,4 +66,4 @@ class BlockedKarma(Base):
 
     topic: Mapped[str] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    added_at: Mapped[datetime] = mapped_column(default=func.current_timestamp())
+    added_at: Mapped[timestamp]

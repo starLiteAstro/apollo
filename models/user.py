@@ -6,7 +6,7 @@ from sqlalchemy_utils import EncryptedType  # type: ignore
 
 from config import CONFIG
 from models.karma import KarmaChange
-from models.models import Base, discord_snowflake
+from models.models import Base, discord_snowflake, timestamp
 
 
 class User(Base):
@@ -20,9 +20,7 @@ class User(Base):
     karma_changes: Mapped[list["KarmaChange"]] = relationship(
         back_populates="user", order_by=KarmaChange.created_at, init=False
     )
-    first_seen: Mapped[datetime] = mapped_column(
-        default_factory=datetime.now, insert_default=func.current_timestamp()
-    )
+    first_seen: Mapped[timestamp]
     last_seen: Mapped[datetime] = mapped_column(
         default_factory=datetime.now, insert_default=func.current_timestamp()
     )

@@ -4,7 +4,7 @@ from typing import Optional
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from models.models import Base
+from models.models import Base, timestamp
 from models.user import User
 from utils.mentions import MentionType
 
@@ -21,9 +21,7 @@ class Quote(Base):
         "User", uselist=False, foreign_keys=author_id, init=False
     )
     author_string: Mapped[Optional[str]] = mapped_column(default=None)
-    created_at: Mapped[datetime] = mapped_column(
-        default_factory=datetime.now, insert_default=func.current_timestamp()
-    )
+    created_at: Mapped[timestamp]
     edited_at: Mapped[Optional[datetime]] = mapped_column(default=None)
 
     def author_to_string(self) -> str:
