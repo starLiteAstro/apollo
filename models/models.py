@@ -24,7 +24,12 @@ user_id = Annotated[int, mapped_column(ForeignKey("users.id"))]
 # discord 'snowflakes' are the really long IDs that you get as like channel or user IDs
 # this annotated column map type uses BigInteger to encode those and convert to python ints
 discord_snowflake = Annotated[int, mapped_column(BigInteger)]
-timestamp = Annotated[datetime, mapped_column(default_factory=datetime.now, insert_default=func.current_timestamp())]
+timestamp = Annotated[
+    datetime,
+    mapped_column(
+        default_factory=datetime.now, insert_default=func.current_timestamp()
+    ),
+]
 
 
 class Base(MappedAsDataclass, DeclarativeBase):
