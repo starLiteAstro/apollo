@@ -18,11 +18,11 @@ class VoteType(enum.Enum):
 
 class Vote(Base):
     __tablename__ = "vote"
-    id: Mapped[int_pk]
+    id: Mapped[int_pk] = mapped_column(init=False)
     owner_id: Mapped[user_id]
     type: Mapped[VoteType]
     ranked_choice: Mapped[bool]
-    created_at: Mapped[timestamp]
+    created_at: Mapped[timestamp] = mapped_column(init=False)
     title: Mapped[str] = mapped_column(default="Vote")
     vote_limit: Mapped[int] = mapped_column(default=0)
     seats: Mapped[int] = mapped_column(default=1)

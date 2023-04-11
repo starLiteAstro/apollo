@@ -20,5 +20,5 @@ class Announcement(Base):
         "User",
         uselist=False,
     )
-    created_at: Mapped[timestamp]
+    created_at: Mapped[timestamp] = mapped_column(init=False)
     irc_name: Mapped[str | None] = mapped_column(default=None)

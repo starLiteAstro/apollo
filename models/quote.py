@@ -21,7 +21,7 @@ class Quote(Base):
         "User", uselist=False, foreign_keys=author_id, init=False
     )
     author_string: Mapped[Optional[str]] = mapped_column(default=None)
-    created_at: Mapped[timestamp]
+    created_at: Mapped[timestamp] = mapped_column(init=False)
     edited_at: Mapped[Optional[datetime]] = mapped_column(default=None)
 
     def author_to_string(self) -> str:

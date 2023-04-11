@@ -11,7 +11,7 @@ class IgnoredChannel(Base):
 
     channel: Mapped[discord_snowflake] = mapped_column(init=False, primary_key=True)
     user_id: Mapped[user_id]
-    added_at: Mapped[timestamp]
+    added_at: Mapped[timestamp] = mapped_column(init=False)
 
 
 class MiniKarmaChannel(Base):
@@ -19,4 +19,4 @@ class MiniKarmaChannel(Base):
 
     channel: Mapped[discord_snowflake] = mapped_column(init=False, primary_key=True)
     user_id: Mapped[user_id]
-    added_at: Mapped[timestamp]
+    added_at: Mapped[timestamp] = mapped_column(init=False)

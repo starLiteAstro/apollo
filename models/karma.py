@@ -47,7 +47,7 @@ class Karma(Base):
         back_populates="karma", order_by=KarmaChange.created_at.asc(), init=False
     )
 
-    added: Mapped[timestamp]
+    added: Mapped[timestamp] = mapped_column(init=False)
     pluses: Mapped[int] = mapped_column(default=0)
     minuses: Mapped[int] = mapped_column(default=0)
     neutrals: Mapped[int] = mapped_column(default=0)
@@ -66,4 +66,4 @@ class BlockedKarma(Base):
 
     topic: Mapped[str] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    added_at: Mapped[timestamp]
+    added_at: Mapped[timestamp] = mapped_column(init=False)

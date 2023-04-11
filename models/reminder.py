@@ -15,6 +15,6 @@ class Reminder(Base):
     trigger_at: Mapped[datetime]
     triggered: Mapped[bool]
     playback_channel_id: Mapped[discord_snowflake]
-    created_at: Mapped[timestamp]
+    created_at: Mapped[timestamp] = mapped_column(init=False)
     user: Mapped["User"] = relationship("User", uselist=False, init=False)
     irc_name: Mapped[str | None] = mapped_column(default=None)

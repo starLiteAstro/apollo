@@ -20,10 +20,8 @@ class User(Base):
     karma_changes: Mapped[list["KarmaChange"]] = relationship(
         back_populates="user", order_by=KarmaChange.created_at, init=False
     )
-    first_seen: Mapped[timestamp]
-    last_seen: Mapped[datetime] = mapped_column(
-        default_factory=datetime.now, insert_default=func.current_timestamp()
-    )
+    first_seen: Mapped[timestamp] = mapped_column(init=False)
+    last_seen: Mapped[timestamp] = mapped_column(init=False)
 
     uni_id = mapped_column(
         EncryptedType(type_in=String, key=CONFIG.BOT_SECRET_KEY), nullable=True
